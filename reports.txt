@@ -1,0 +1,260 @@
+var removeDetails = function() {
+    var elArr = document.getElementById('detailsTable').getElementsByTagName('tr');
+    for (var i = 0; i < elArr.length; i++) {
+        elArr[i].style = 'display:none'
+    }
+};
+var goback = function(e) {
+    e = e || window.event;
+    if (e.charCode == 82 || e.charCode == 114 || e.charCode == 8) {
+        location.reload()
+    } else if (e.charCode == 69 || e.charCode == 101) {
+        expandAll()
+    } else if (e.charCode == 67 || e.charCode == 99) {
+        collapseAll()
+    }
+};
+var expandSummary = function(className) {
+    document.getElementById('detailsTable').getElementsByTagName('tr')[0].style = '';
+    var elArr = document.getElementsByClassName(className);
+    for (var i = 0; i < elArr.length; i++) {
+        elArr[i].style = ''
+    }
+};
+
+function updateCounts() {
+    var rowCount = document.getElementById('detailsTable').getElementsByTagName('tr').length;
+    var stepsExecuted = rowCount - 1;
+    var stepsPassed = 0;
+    var stepsFailed = 0;
+    for (var i = 1; i < rowCount; i++) {
+        if (document.getElementById('detailsTable').getElementsByTagName('tr')[i].getElementsByTagName('td').length > 2) {
+            if (document.getElementById('detailsTable').getElementsByTagName('tr')[i].style.display != 'none') {
+                if (document.getElementById('detailsTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[2].className == 'failed') {
+                    stepsFailed = stepsFailed + 1
+                } else {
+                    stepsPassed = stepsPassed + 1
+                }
+            }
+        }
+    }
+    stepsExecuted = stepsFailed + stepsPassed;
+    document.getElementById('footer2').getElementsByTagName('tr')[1].getElementsByTagName('td')[1].textContent = stepsExecuted;
+    document.getElementById('footer2').getElementsByTagName('tr')[1].getElementsByTagName('td')[3].textContent = stepsPassed;
+    document.getElementById('footer2').getElementsByTagName('tr')[1].getElementsByTagName('td')[5].textContent = stepsFailed
+};
+
+function expandAll() {
+    for (var i = 1; i < document.getElementById('detailsTable').getElementsByTagName('tr').length - 1; i++) {
+        strClassName = document.getElementById('detailsTable').getElementsByTagName('tr')[i].className;
+        if (document.getElementById('detailsTable').getElementsByTagName('tr')[i].style.display != 'none') {
+            if (document.getElementById('detailsTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[0].title == 'Nested Diagnostic Context') {
+                i = i + 1;
+                while (document.getElementById('detailsTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[0].title != 'Nested Diagnostic Context' && document.getElementById('detailsTable').getElementsByTagName('tr')[i].className == strClassName) {
+                    document.getElementById('detailsTable').getElementsByTagName('tr')[i].style.display = '';
+                    i = i + 1
+                }
+                i = i - 1
+            }
+        }
+    }
+};
+
+function collapseAll() {
+    for (var i = 1; i < document.getElementById('detailsTable').getElementsByTagName('tr').length - 1; i++) {
+        if (document.getElementById('detailsTable').getElementsByTagName('tr')[i].style.display != 'none') {
+            strClassName = document.getElementById('detailsTable').getElementsByTagName('tr')[i].className;
+            if (document.getElementById('detailsTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[0].title == 'Nested Diagnostic Context') {
+                i = i + 1;
+                while (document.getElementById('detailsTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[0].title != 'Nested Diagnostic Context' && document.getElementById('detailsTable').getElementsByTagName('tr')[i].className == strClassName) {
+                    document.getElementById('detailsTable').getElementsByTagName('tr')[i].style.display = 'none';
+                    i = i + 1
+                }
+                i = i - 1
+            }
+        }
+    }
+};
+
+function updateTestExecutionDetail() {
+    var firstStamp = null;
+    var lastStamp = null;
+    for (var i = 1; i < document.getElementById('detailsTable').getElementsByTagName('tr').length - 1; i++) {
+        if (document.getElementById('detailsTable').getElementsByTagName('tr')[i].style.display != 'none') {
+            strClassName = document.getElementById('detailsTable').getElementsByTagName('tr')[i].className;
+            if (document.getElementById('detailsTable').getElementsByTagName('tr')[i].getElementsByTagName('td').length > 2) {
+                if (firstStamp == null) {
+                    firstStamp = document.getElementById('detailsTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[3].textContent
+                }
+                lastStamp = document.getElementById('detailsTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[3].textContent
+            }
+        }
+    }
+    var d1 = new Date(firstStamp).getTime();
+    var d2 = new Date(lastStamp).getTime();
+    var duration = (d2 - d1) / 1000;
+    document.getElementById('footer2').getElementsByTagName('tr')[0].getElementsByTagName('th')[0].textContent = 'Total Duration  In Seconds : ' + duration + ''
+};
+
+function sectionHightlight() {
+    var cSec = null;
+    for (var i = 1; i < document.getElementById('detailsTable').getElementsByTagName('tr').length; i++) {
+        strClassName = document.getElementById('detailsTable').getElementsByTagName('tr')[i].className;
+        if (document.getElementById('detailsTable').getElementsByTagName('tr')[i].style.display != 'none') {
+            if (document.getElementById('detailsTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[0].title == 'Nested Diagnostic Context') {
+                cSec = i;
+                i = i + 1;
+                while (document.getElementById('detailsTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[0].title != 'Nested Diagnostic Context' && document.getElementById('detailsTable').getElementsByTagName('tr')[i].className == strClassName) {
+                    if (document.getElementById('detailsTable').getElementsByTagName('tr')[i].getElementsByTagName('td').length > 1) {
+                        if (document.getElementById('detailsTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[2].className == 'failed') {
+                            document.getElementById('detailsTable').getElementsByTagName('tr')[cSec].getElementsByTagName('td')[0].bgColor = '#FA5858'
+                        }
+                    }
+                    i = i + 1
+                }
+                i = i - 1
+            }
+        }
+    }
+};
+
+function loadDetails(className) {
+    document.getElementById('header').getElementsByTagName('tr')[0].getElementsByTagName('th')[0].textContent = 'Automated Test Execution Results (' + className + ')';
+    removeDetails();
+    expandSummary(className);
+    document.getElementById('main').style.display = 'none';
+    document.getElementById('details').style.display = '';
+    updateCounts();
+    updateTestExecutionDetail();
+    window.addEventListener('keypress', goback, false);
+    window.addEventListener('mousedown', expandSection, false);
+    sectionHightlight();
+};
+var expandSection = function(e) {
+    var el = e.target;
+    var strClassName = el.parentNode.className;
+    if (el.title == 'Nested Diagnostic Context') {
+        while (el.parentNode.nextElementSibling.getElementsByTagName('td')[0].title != 'Nested Diagnostic Context') {
+            el = el.parentNode.nextElementSibling.getElementsByTagName('td')[0];
+            if (el.parentNode.className == strClassName) {
+                if (el.parentNode.style.display == '') {
+                    el.parentNode.style.display = 'none'
+                } else {
+                    el.parentNode.style.display = ''
+                }
+            }
+        }
+    }
+};
+var totalRows = document.getElementById('detailsTable').getElementsByTagName('tr');
+var totalTestsUnGrouped = [];
+for (var i = 1; i < totalRows.length; i++) {
+    totalTestsUnGrouped[i - 1] = totalRows[i].className
+}
+var totalTestsGrouped = totalTestsUnGrouped.filter(function(item, index, inputArray) {
+    return inputArray.indexOf(item) == index
+});
+for (var i = 0; i < totalTestsGrouped.length; i++) {
+    var targetTable = document.getElementById('summaryTable');
+    var row = targetTable.insertRow(i + 1);
+    row.setAttribute('onclick', "loadDetails('" + totalTestsGrouped[i] + "')");
+    var cTestName = row.insertCell(0);
+    cTestName.setAttribute('style', 'text-align: left;');
+    var cTestDescription = row.insertCell(1);
+    cTestDescription.setAttribute('style', 'text-align: left;');
+    var cTestStatus = row.insertCell(2);
+    var cTestDuration = row.insertCell(3);
+    cTestName.innerHTML = "<a title='Click to see details' style='text-decoration:none' onClick=loadDetails('" + totalTestsGrouped[i] + "')>" + totalTestsGrouped[i] + "</a>";
+    cTestDescription.innerHTML = 'Under testing';
+    cTestStatus.innerHTML = 'Under testing';
+    cTestDuration.innerHTML = 'Under testing'
+};
+getDurationOfTests();
+getDescription();
+getTestStatus();
+updateSummaryCounts();
+
+function updateSummaryCounts() {
+    var totalTests = document.getElementById('summaryTable').getElementsByTagName('tr').length - 1;
+    var passedCount = 0;
+    var failedCount = 0;
+    document.getElementById('header').getElementsByTagName('tr')[2].getElementsByTagName('th')[3].textContent = totalTests;
+    for (var i = 1; i < document.getElementById('summaryTable').getElementsByTagName('tr').length; i++) {
+        if (document.getElementById('summaryTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[2].textContent.indexOf('Failed') < 0) {
+            failedCount = failedCount + 1
+        } else {
+            passedCount = passedCount + 1
+        }
+    }
+    document.getElementById('footer').getElementsByTagName('tr')[1].getElementsByTagName('td')[1].textContent = failedCount;
+    document.getElementById('footer').getElementsByTagName('tr')[1].getElementsByTagName('td')[3].textContent = passedCount
+};
+
+function getTestStatus() {
+    for (var i = 1; i < document.getElementById('summaryTable').getElementsByTagName('tr').length; i++) {
+        if (document.getElementById('summaryTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[1].textContent.indexOf(', 0 Failed') > 0) {
+            document.getElementById('summaryTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[2].textContent = 'Passed';
+            document.getElementById('summaryTable').getElementsByTagName('tr')[i].style.color = 'green';
+        } else {
+            document.getElementById('summaryTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[2].textContent = 'Failed';
+            document.getElementById('summaryTable').getElementsByTagName('tr')[i].style.color = 'red';
+        }
+    }
+};
+
+function getDescription() {
+    var strClassName = null;
+    var stepPassed = 0;
+    var stepFailed = 0;
+    var stepsExecuted = 0;
+    for (var i = 1; i < document.getElementById('summaryTable').getElementsByTagName('tr').length; i++) {
+        strClassName = document.getElementById('summaryTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[0].textContent;
+        for (var j = 1; j < document.getElementById('detailsTable').getElementsByTagName('tr').length; j++) {
+            if (document.getElementById('detailsTable').getElementsByTagName('tr')[j].getElementsByTagName('td').length > 2 && document.getElementById('detailsTable').getElementsByTagName('tr')[j].className == strClassName) {
+                if (document.getElementById('detailsTable').getElementsByTagName('tr')[j].getElementsByTagName('td')[2].className == 'failed') {
+                    stepFailed = stepFailed + 1
+                } else {
+                    stepPassed = stepPassed + 1
+                }
+            }
+        }
+        stepsExecuted = stepPassed + stepFailed;
+        document.getElementById('summaryTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[1].textContent = '' + stepsExecuted + ' Steps Executed, ' + stepPassed + ' Passed, ' + stepFailed + ' Failed';
+        stepFailed = 0;
+        stepPassed = 0;
+        stepsExecuted = 0
+    }
+};
+
+function getDurationOfTests() {
+    var finalSummation = 0;
+    var strClassName = null;
+    var testDuration = null;
+    var firstStamp = null;
+    var lastStamp = null;
+    var d1 = null;
+    var d2 = null;
+    var duration = null;
+    for (var i = 1; i < document.getElementById('summaryTable').getElementsByTagName('tr').length; i++) {
+        strClassName = document.getElementById('summaryTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[0].textContent;
+        for (var j = 1; j < document.getElementById('detailsTable').getElementsByTagName('tr').length; j++) {
+            if (document.getElementById('detailsTable').getElementsByTagName('tr')[j].getElementsByTagName('td').length > 2 && document.getElementById('detailsTable').getElementsByTagName('tr')[j].className == strClassName) {
+                if (firstStamp == null) {
+                    firstStamp = document.getElementById('detailsTable').getElementsByTagName('tr')[j].getElementsByTagName('td')[3].textContent
+                }
+                lastStamp = document.getElementById('detailsTable').getElementsByTagName('tr')[j].getElementsByTagName('td')[3].textContent
+            }
+        }
+        d1 = new Date(firstStamp).getTime();
+        d2 = new Date(lastStamp).getTime();
+        duration = (d2 - d1) / 1000;
+        document.getElementById('summaryTable').getElementsByTagName('tr')[i].getElementsByTagName('td')[3].textContent = duration + ' Seconds';
+        finalSummation = finalSummation + duration;
+        d1 = null;
+        d2 = null;
+        duration = null;
+        firstStamp = null;
+        lastStamp = null
+    }
+    document.getElementById('footer').getElementsByTagName('tr')[0].getElementsByTagName('th')[0].textContent = 'Total Duration In Seconds : ' + finalSummation + ''
+};
